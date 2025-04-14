@@ -3,7 +3,7 @@ name: Deploy to AWS
 on:
   push:
     branches:
-      - main  # or whatever branch you deploy from
+      - main
 
 jobs:
   deploy:
@@ -14,7 +14,6 @@ jobs:
       ECR_REPO_URI: ${{ secrets.ECR_REPO_URI }}
       ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
       ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
-      ECS_TASK_DEF: ${{ secrets.ECS_TASK_DEF }}
 
     steps:
       - name: Checkout code
@@ -28,7 +27,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Log in to Amazon ECR
-        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to ECR
@@ -37,9 +35,9 @@ jobs:
           docker tag flask-api:latest $ECR_REPO_URI:latest
           docker push $ECR_REPO_URI:latest
 
-      - name: Update ECS service
-        uses: aws-actions/amazon-ecs-deploy-service@v1
+      - name: Trigger new ECS deployment
+        uses: aws-actions/amazon-ecs-update-service@v1
         with:
           cluster: ${{ secrets.ECS_CLUSTER }}
           service: ${{ secrets.ECS_SERVICE }}
-          image: ${{ secrets.ECR_REPO_URI }}:latest
+          force-new-deployment: true
