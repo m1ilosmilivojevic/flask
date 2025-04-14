@@ -42,3 +42,4 @@ jobs:
         with:
           cluster: ${{ env.ECS_CLUSTER }}
           service: ${{ env.ECS_SERVICE }}
+          image: ${{ secrets.ECR_REPO_URI }}:latest
