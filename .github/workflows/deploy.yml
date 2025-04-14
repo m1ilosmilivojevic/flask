@@ -1,38 +1,45 @@
-name: Deploy to ECS
+name: Deploy to AWS
 
 on:
   push:
     branches:
-      - main  # or 'master' if that's your default branch
+      - main  # or whatever branch you deploy from
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      ECR_REPO_URI: ${{ secrets.ECR_REPO_URI }}
+      ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+      ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+      ECS_TASK_DEF: ${{ secrets.ECS_TASK_DEF }}
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: ${{ env.AWS_REGION }}
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build, tag, and push image to ECR
-      run: |
-        IMAGE_TAG=${{ github.sha }}
-        docker build -t ${{ secrets.ECR_REPO_URI }}:$IMAGE_TAG .
-        docker push ${{ secrets.ECR_REPO_URI }}:$IMAGE_TAG
+      - name: Build, tag, and push image to ECR
+        run: |
+          docker build -t flask-api .
+          docker tag flask-api:latest $ECR_REPO_URI:latest
+          docker push $ECR_REPO_URI:latest
 
-    - name: Update ECS service with new task definition
-      run: |
-        TASK_DEF=$(aws ecs describe-task-definition --task-definition ${{ secrets.ECS_TASK_DEF }})
-        NEW_TASK_DEF=$(echo $TASK_DEF | jq --arg IMAGE "${{ secrets.ECR_REPO_URI }}:${{ github.sha }}" '.taskDefinition | .containerDefinitions[0].image = $IMAGE | {family: .family, containerDefinitions: .containerDefinitions, executionRoleArn: .executionRoleArn, networkMode: .networkMode, requiresCompatibilities: .requiresCompatibilities, cpu: .cpu, memory: .memory}')
-        REVISION=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" | jq -r '.taskDefinition.taskDefinitionArn')
-        aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER }} --service ${{ secrets.ECS_SERVICE }} --task-definition $REVISION
+      - name: Update ECS service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          cluster: ${{ env.ECS_CLUSTER }}
+          service: ${{ env.ECS_SERVICE }}
+          task-definition: ${{ env.ECS_TASK_DEF }}
