@@ -38,7 +38,7 @@ jobs:
           docker push $ECR_REPO_URI:latest
 
       - name: Update ECS service
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-service@v1
         with:
           cluster: ${{ env.ECS_CLUSTER }}
           service: ${{ env.ECS_SERVICE }}
