@@ -38,7 +38,7 @@ jobs:
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-            task-definition: ${{ secrets.ECS_TASK_DEF }}
+            task-definition: arn:aws:ecs:eu-north-1:032199199475:task-definition/flask-api-task:3
             service: ${{ secrets.ECS_SERVICE }}
             cluster: ${{ secrets.ECS_CLUSTER }}
             wait-for-service-stability: true
