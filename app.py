@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "Flask CI/CD working from ECS!"
+    return "Flask CI/CD working from ECS! Test??"
 
 @app.route('/stress')
 def stress():
