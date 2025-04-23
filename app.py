@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, render_template
 import pymysql
 import os
 
@@ -8,6 +8,33 @@ DB_HOST = os.getenv("DB_HOST", "mydb.cfk0g0esw3n9.eu-north-1.rds.amazonaws.com")
 DB_USER = os.getenv("DB_USER", "admin")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "Ligmaballs:123")
 DB_NAME = os.getenv("DB_NAME", "mydb")
+
+@app.route("/users/add", methods=["GET", "POST"])
+def add_user():
+    message = ""
+    if request.method == "POST":
+        name = request.form["name"]
+        email = request.form["email"]
+        try:
+            connection = pymysql.connect(
+                host=DB_HOST,
+                user=DB_USER,
+                password=DB_PASSWORD,
+                database=DB_NAME
+            )
+            with connection.cursor() as cursor:
+                cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (name, email))
+            connection.commit()
+            connection.close()
+            message = "User added successfully!"
+        except Exception as e:
+            message = f"Error: {str(e)}"
+    return render_template("input_users.html", message=message)
+
+@app.route("/")
+
+
+
 
 @app.route('/users/health')
 def health():
