@@ -4,10 +4,10 @@ import os
 
 app = Flask(__name__)
 
-DB_HOST = os.getenv("DB_HOST", "database-1.cluster-cfk0g0esw3n9.eu-north-1.rds.amazonaws.com")
+DB_HOST = os.getenv("DB_HOST", "mydb.cfk0g0esw3n9.eu-north-1.rds.amazonaws.com")
 DB_USER = os.getenv("DB_USER", "admin")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "Ligmaballs:123")
-DB_NAME = os.getenv("DB_NAME", "database-1")
+DB_NAME = os.getenv("DB_NAME", "mydb")
 
 @app.route('/users/tables')
 def list_tables():
