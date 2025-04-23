@@ -9,6 +9,21 @@ DB_USER = os.getenv("DB_USER", "admin")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "Ligmaballs:123")
 DB_NAME = os.getenv("DB_NAME", "mydb")
 
+@app.route('/users/health')
+def health():
+    print(f"Connecting to: host={DB_HOST}, user={DB_USER}, db={DB_NAME}")
+    try:
+        connection = pymysql.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME
+        )
+        connection.close()
+        return "Database connection successful!"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
 @app.route('/users/tables')
 def list_tables():
     try:
