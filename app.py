@@ -32,6 +32,8 @@ def add_user():
     return render_template("input_users.html", message=message)
 
 @app.route("/")
+def index():
+    return render_template("index.html") 
 
 
 
@@ -71,6 +73,23 @@ def list_tables():
 @app.route('/users')
 def users_index():
     return "Flask CI/CD working from ECS! Under /users"
+
+@app.route('/users/show_all')
+def show_all_users():
+    try:
+        connection = pymysql.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME
+        )
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM users;")
+            users = cursor.fetchall()
+        connection.close()
+        return f"Users: {users}"
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 @app.route('/users/stress')
 def stress():
