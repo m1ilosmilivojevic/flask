@@ -1,22 +1,32 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import pymysql
 import os
 from dotenv import load_dotenv
 
+# Load .env once
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path=dotenv_path, override=True)
 
 app = Flask(__name__)
 
-# Load environment variables from .env file
+# DB config
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
-# Print the loaded environment variables for debugging
-print(f"Loaded DB_USER={DB_USER}")
 
+# Helper to connect
+def get_db_connection():
+    return pymysql.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME
+    )
 
+@app.route("/")
+def index():
+    return "Welcome to the Users API!"
 
 @app.route("/users/add", methods=["GET", "POST"])
 def add_user():
@@ -25,12 +35,7 @@ def add_user():
         name = request.form["name"]
         email = request.form["email"]
         try:
-            connection = pymysql.connect(
-                host=DB_HOST,
-                user=DB_USER,
-                password=DB_PASSWORD,
-                database=DB_NAME
-            )
+            connection = get_db_connection()
             with connection.cursor() as cursor:
                 cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (name, email))
             connection.commit()
@@ -40,30 +45,14 @@ def add_user():
             message = f"Error: {str(e)}"
     return render_template("input_users.html", message=message)
 
-@app.route("/")
-def index():
-    dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
-    print(f"Loading .env from: {dotenv_path}")
-    print(f"Loaded DB_USER={DB_USER}")
-    ###return render_template("index.html") 
-
 @app.route("/users/creds")
 def credentials():
     return f"DB_HOST: {DB_HOST}, DB_USER: {DB_USER}, DB_PASSWORD: {DB_PASSWORD}, DB_NAME: {DB_NAME}"
 
-
-
-
 @app.route('/users/health')
 def health():
-    print(f"Connecting to: host={DB_HOST}, user={DB_USER}, db={DB_NAME}")
     try:
-        connection = pymysql.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
+        connection = get_db_connection()
         connection.close()
         return "Database connection successful!"
     except Exception as e:
@@ -72,19 +61,14 @@ def health():
 @app.route('/users/tables')
 def list_tables():
     try:
-        connection = pymysql.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
+        connection = get_db_connection()
         with connection.cursor() as cursor:
             cursor.execute("SHOW TABLES;")
             tables = cursor.fetchall()
         connection.close()
-        return f"Tables: {tables}"
+        return jsonify(tables)
     except Exception as e:
-        return f"Error: {str(e)}"
+        return jsonify({"error": str(e)})
 
 @app.route('/users')
 def users_index():
@@ -93,23 +77,22 @@ def users_index():
 @app.route('/users/show_all')
 def show_all_users():
     try:
-        connection = pymysql.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
-        with connection.cursor() as cursor:
+        connection = get_db_connection()
+        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("SELECT * FROM users;")
             users = cursor.fetchall()
         connection.close()
-        return f"Users: {users}"
+        return jsonify(users)
     except Exception as e:
-        return f"Error: {str(e)}"
+        return jsonify({"error": str(e)})
 
 @app.route('/users/stress')
 def stress():
-    while True: pass
+    timeout = 5
+    start = time.time()
+    while time.time() - start < timeout:
+        pass
+    return "Stress test complete!"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
