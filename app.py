@@ -40,6 +40,9 @@ def add_user():
 
 @app.route("/")
 def index():
+    dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+    print(f"Loading .env from: {dotenv_path}")
+    print(f"Loaded DB_USER={DB_USER}")
     return render_template("index.html") 
 
 @app.route("/users/creds")
