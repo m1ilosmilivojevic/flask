@@ -5,16 +5,16 @@ from dotenv import load_dotenv
 
 app = Flask(__name__)
 
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(dotenv_path=dotenv_path, override=True)
-
-print(f"Loaded DB_HOST={DB_HOST}") 
-
-
+# Load environment variables from .env file
+load_dotenv()
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
+# Print the loaded environment variables for debugging
+print(f"Loaded DB_USER={DB_USER}")
+
+
 
 @app.route("/users/add", methods=["GET", "POST"])
 def add_user():
