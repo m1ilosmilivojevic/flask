@@ -38,6 +38,10 @@ def add_user():
 def index():
     return render_template("index.html") 
 
+@app.route("/users/creds")
+def credentials():
+    return f"DB_HOST: {DB_HOST}, DB_USER: {DB_USER}, DB_PASSWORD: {DB_PASSWORD}, DB_NAME: {DB_NAME}"
+
 
 
 
