@@ -1,25 +1,19 @@
+# app.py
 from flask import Flask, request, render_template, jsonify
 import pymysql
-import os
-from dotenv import load_dotenv, find_dotenv
+import time
+from config import Config
 
-# Load .env once
-load_dotenv(find_dotenv())
 app = Flask(__name__)
+app.config.from_object(Config)
 
-# DB config
-DB_HOST = os.getenv("DB_HOST")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
-
-# Helper to connect
+# DB Connection helper
 def get_db_connection():
     return pymysql.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME
+        host=app.config["DB_HOST"],
+        user=app.config["DB_USER"],
+        password=app.config["DB_PASSWORD"],
+        database=app.config["DB_NAME"]
     )
 
 @app.route("/")
@@ -45,9 +39,9 @@ def add_user():
 
 @app.route("/users/creds")
 def credentials():
-    return f"DB_HOST: {DB_HOST}, DB_USER: {DB_USER}, DB_PASSWORD: {DB_PASSWORD}, DB_NAME: {DB_NAME}"
+    return f"DB_HOST: {app.config['DB_HOST']}, DB_USER: {app.config['DB_USER']}, DB_PASSWORD: {app.config['DB_PASSWORD']}, DB_NAME: {app.config['DB_NAME']}"
 
-@app.route('/users/health')
+@app.route("/users/health")
 def health():
     try:
         connection = get_db_connection()
@@ -93,4 +87,4 @@ def stress():
     return "Stress test complete!"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=app.config['DEBUG'])
