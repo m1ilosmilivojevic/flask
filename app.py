@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template
 import pymysql
 import os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 
