@@ -10,10 +10,10 @@ load_dotenv(dotenv_path=dotenv_path, override=True)
 app = Flask(__name__)
 
 # DB config
-DB_HOST = os.getenv("DB_HOST")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
+DB_HOST = os.getenv("DB_HOST", "mydb.cfk0g0esw3n9.eu-north-1.rds.amazonaws.com")
+DB_USER = os.getenv("DB_USER", "admin")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "Ligmaballs:123")
+DB_NAME = os.getenv("DB_NAME", "mydb")
 
 # Helper to connect
 def get_db_connection():
