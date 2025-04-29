@@ -18,7 +18,7 @@ def get_db_connection():
 
 @app.route("/")
 def index():
-    return "Welcome to the Users API!"
+    return "Welcome to the Users API."
 
 @app.route("/users/add", methods=["GET", "POST"])
 def add_user():
@@ -37,9 +37,6 @@ def add_user():
             message = f"Error: {str(e)}"
     return render_template("input_users.html", message=message)
 
-@app.route("/users/creds")
-def credentials():
-    return f"DB_HOST: {app.config['DB_HOST']}, DB_USER: {app.config['DB_USER']}, DB_PASSWORD: {app.config['DB_PASSWORD']}, DB_NAME: {app.config['DB_NAME']}"
 
 @app.route("/users/health")
 def health():
@@ -64,7 +61,7 @@ def list_tables():
 
 @app.route('/users')
 def users_index():
-    return "Flask CI/CD working from ECS! Under /users"
+    return "Flask CI/CD from ECS. "
 
 @app.route('/users/show_all')
 def show_all_users():
@@ -84,7 +81,7 @@ def stress():
     start = time.time()
     while time.time() - start < timeout:
         pass
-    return "Stress test complete!"
+    return "Stress test complete."
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=app.config['DEBUG'])
